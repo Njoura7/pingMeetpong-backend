@@ -1,36 +1,34 @@
 import { Router } from "express";
 import User from "../models/User";
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
+import { registerUser, loginUser } from "../controllers/userController";
 
-dotenv.config();
 
 const router = Router();
 
-router.post("/register", async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    await User.create({ username, password });
-    res.status(201).send("User created successfully. Please log in.");
-  } catch (err) {
-    res.status(400).send("Error, user not created");
-  }
-});
+  router.post("/register", async (req, res) => {
+    const { username, password } = req.body;
+    // Check if user already exists
+    const existingUser = await User.findOne({ username });
+      try {
+        await registerUser(username, password);
+        res
+          .status(201)
+          .json({ message: "User created successfully. Please log in." });
+      } catch (err) {
+         const message = (err as Error).message;
+         res.status(400).json({ message });
+      }
+  });
 
-router.post("/login", async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const user = await User.login(username, password);
-    if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET is not defined in .env file");
+  router.post("/login", async (req, res) => {
+    const { username, password } = req.body;
+    try {
+      const result = await loginUser(username, password);
+      res.status(200).json(result);
+    } catch (err) {
+       const message = (err as Error).message;
+       res.status(400).json({ message });
     }
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "2h",
-    });
-    res.status(200).json({ user: user._id, accessToken: token });
-  } catch (err) {
-    res.status(400).send("Incorrect username or password");
-  }
-});
+  });
 
 export default router;
