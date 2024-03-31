@@ -5,14 +5,14 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export const registerUser = async (username: string, password: string) => {
+export const registerUser = async (username: string, password: string , avatar:string) => {
   // Check if user already exists
   const existingUser = await User.findOne({ username });
   if (existingUser) {
     throw new Error("Username already exists");
   }
 
-  await User.create({ username, password });
+  await User.create({ username, password, avatar });
 };
 
 export const loginUser = async (username: string, password: string) => {
@@ -35,5 +35,5 @@ export const loginUser = async (username: string, password: string) => {
     expiresIn: "2h",
   });
 
-  return { user: user._id, accessToken: token };
+  return { user: user._id, accessToken: token, username:user.username, avatar: user.avatar };
 };

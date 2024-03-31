@@ -4,11 +4,13 @@ import bcrypt from "bcrypt";
 interface IUser extends Document {
   username: string;
   password: string;
+  avatar:   string ; // Identifier of the avatar
 }
 
 const userSchema = new mongoose.Schema<IUser>({
   username: { type: String, required: true, unique: true },
-  password: { type: String, required: true, minlength: 7 },
+  password: { type: String, required: true, minlength: 5 },
+  avatar: { type: String, required: true },
 });
 
 userSchema.pre("save", async function (next) {
