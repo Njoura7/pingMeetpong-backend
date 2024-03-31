@@ -1,9 +1,10 @@
 import express from "express";
 import { Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
-import mongoose from "mongoose";
 import cors from "cors";
+import { connectDB } from "../db/connect"; 
 import authRoutes from "../routes/authRoutes";
+import matchRoutes from "../routes/matchRoutes";
 
 
 dotenv.config();
@@ -26,21 +27,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 // Use routers
-app.use("/api", authRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/matches", matchRoutes);
 
 
-mongoose
-  .connect(uri)
-  .then(() => {
-    console.log(`Successfully connected to MongoDB in ${env} mode!`);
-    app.listen(port, () =>
-      console.log(`Server is running on port ${port} in ${env} mode`)
-    );
-  })
-  .catch((error) => {
-    console.error("MongoDB connection error:", error);
-    process.exit(1);
-  });
+// Use the connectDB function
+connectDB().then(() => {
+  app.listen(port, () =>
+    console.log(`Server is running on port ${port} in ${env} mode`)
+  );
+});
 
 app.get("/", (req, res) => {
   res.send(`Hello World, running in ${env} mode`);

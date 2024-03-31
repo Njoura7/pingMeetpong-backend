@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 interface IUser extends Document {
   username: string;
   password: string;
-  avatar:   string ; // Identifier of the avatar
+  avatar:   string ; // url of the avatar
 }
 
 const userSchema = new mongoose.Schema<IUser>({
