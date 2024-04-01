@@ -4,12 +4,15 @@ import {
 //   updateMatch,
 //   getMatchesByUserId,
 } from "../controllers/matchController";
+import { findMatchesByPlayer } from "../controllers/findMatchesController";
+import { authMiddleware } from "../middlewares/authMiddleware"; // Import the middleware
+
 
 const router = Router();
 
-router.post("/", createMatch);
+router.post("/",authMiddleware, createMatch);
 
-// router.get("/user/:userId", getMatchesByUserId);
+router.get("/:playerId",authMiddleware, findMatchesByPlayer);
 
 // router.put("/:id", updateMatch);
 

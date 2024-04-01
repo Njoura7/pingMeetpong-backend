@@ -28,7 +28,8 @@ app.use(cors());
 
 // Use routers
 app.use("/api/auth", authRoutes);
-app.use("/matches", matchRoutes);
+app.use("/api/matches", matchRoutes);
+app.use("/api/matches/player", matchRoutes);
 
 
 // Use the connectDB function

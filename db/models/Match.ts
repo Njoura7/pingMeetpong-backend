@@ -5,6 +5,8 @@ interface IMatch extends Document {
   code: string;
   place: string;
   date: Date;
+  owner: mongoose.Types.ObjectId; // Reference to User model for the owner
+  players: mongoose.Types.ObjectId[]; // Array of references to User model for the players
 }
 
 const matchSchema = new mongoose.Schema<IMatch>({
@@ -12,6 +14,8 @@ const matchSchema = new mongoose.Schema<IMatch>({
   code: { type: String, required: true, unique: true },
   place: { type: String, required: true },
   date: { type: Date, required: true },
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  players: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 });
 
 const Match = mongoose.model<IMatch>("match", matchSchema);

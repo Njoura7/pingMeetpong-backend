@@ -1,12 +1,23 @@
 import Match from "../db/models/Match";
 import { Request, Response } from "express";
+import { loginUser } from "../controllers/authController";
 
-
-export const createMatch = async (req:Request, res:Response) => {
+export const createMatch = async (req: Request &{user?: string}, res: Response) => {
   const { name, code, place, date } = req.body;
+  const userId = req.user; // Get the user's ID from req.user
+
   try {
-    const match = new Match({ name, code, place, date });
+    // Check if match with the same name or code already exists
+    const existingMatch = await Match.findOne({ $or: [{ name }, { code }] });
+    if (existingMatch) {
+      return res.status(400).json({
+        message: "Match with the same name or code already exists.",
+        data: null,
+      });
+    }
+    const match = new Match({ name, code, place, date, owner: userId });
     await match.save();
+
     res.status(201).json({
       message: "Match created successfully.",
       data: match,
@@ -23,11 +34,3 @@ export const createMatch = async (req:Request, res:Response) => {
     }
   }
 };
-
-// export const getMatchesByUserId = async (req, res) => {
-//   // Implement the logic to get all matches for a specific user
-// };
-
-// export const updateMatch = async (req, res) => {
-//   // Implement the logic to update a match
-// };
