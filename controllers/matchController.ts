@@ -1,20 +1,32 @@
 import Match from "../db/models/Match";
 import { Request, Response } from "express";
-import { loginUser } from "../controllers/authController";
+import crypto from "crypto";
 
-export const createMatch = async (req: Request &{user?: string}, res: Response) => {
-  const { name, code, place, date } = req.body;
+
+export const createMatch = async (
+  req: Request & { user?: string },
+  res: Response
+) => {
+  const { name, place, date } = req.body;
   const userId = req.user; // Get the user's ID from req.user
 
   try {
-    // Check if match with the same name or code already exists
-    const existingMatch = await Match.findOne({ $or: [{ name }, { code }] });
+    // Check if match with the same name already exists
+    const existingMatch = await Match.findOne({ name });
     if (existingMatch) {
       return res.status(400).json({
-        message: "Match with the same name or code already exists.",
+        message: "Match with the same name already exists.",
         data: null,
       });
     }
+
+    let code;
+    let matchWithCode;
+    do {
+      code = crypto.randomBytes(3).toString("hex").slice(0, 5); // Generate a new code
+      matchWithCode = await Match.findOne({ code }); // Check if a match with this code already exists
+    } while (matchWithCode);
+
     const match = new Match({ name, code, place, date, owner: userId });
     await match.save();
 

@@ -21,6 +21,7 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.2.3",
+    "nanoid": "^5.0.6",
     "server-destroy": "^1.0.1"
   },
   "devDependencies": {
