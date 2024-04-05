@@ -1,11 +1,16 @@
 import express from "express";
 import { Request, Response, NextFunction } from "express";
+import { createServer } from "http";
 import dotenv from "dotenv";
 import cors from "cors";
-import { connectDB } from "../db/connect"; 
+
+import { connectDB } from "../db/connectDB";
 import authRoutes from "../routes/authRoutes";
 import matchRoutes from "../routes/matchRoutes";
+import usersRoutes from "../routes/usersRoutes";
+import invitationsRoutes from "../routes/invitationsRoutes";
 
+import { io } from "./socketServer"; // Import io from socketServer.ts
 
 dotenv.config();
 
@@ -29,14 +34,21 @@ app.use(cors());
 // Use routers
 app.use("/api/auth", authRoutes);
 app.use("/api/matches", matchRoutes);
+app.use("/api/users", usersRoutes);
+app.use("/api/invitations", invitationsRoutes);
 
+// Attach Socket.IO server to the HTTP server
+const httpServer = createServer(app);
+io.attach(httpServer);
 
+// Start the HTTP server
+httpServer.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
 
-// Use the connectDB function
-connectDB().then(() => {
-  app.listen(port, () =>
-    console.log(`Server is running on port ${port} in ${env} mode`)
-  );
+// catch errors from the connectDB function
+connectDB().catch((error) => {
+  console.error(`Failed to connect to MongoDB: ${error.message}`);
 });
 
 app.get("/", (req, res) => {
@@ -44,8 +56,7 @@ app.get("/", (req, res) => {
 });
 
 // Global error handler
-app.use((err:any, req: Request, res: Response, next: NextFunction) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(500).send("Something broke!");
 });
-

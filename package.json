@@ -21,8 +21,8 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.2.3",
-    "nanoid": "^5.0.6",
-    "server-destroy": "^1.0.1"
+    "server-destroy": "^1.0.1",
+    "socket.io": "^4.7.5"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

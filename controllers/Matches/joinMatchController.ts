@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Match from "../db/models/Match";
+import Match from "../../db/models/Match";
 import { Request, Response } from "express";
 
 const joinMatchController = async (
@@ -21,6 +21,12 @@ const joinMatchController = async (
 
   if (!match) {
     return res.status(404).json({ message: "Match not found" });
+  }
+  // Check if the user is the owner of the match
+  if (match.owner.toString() === userId) {
+    return res
+      .status(400)
+      .json({ message: "You cannot join a match that you created" });
   }
 
   // Check if user has already joined the match

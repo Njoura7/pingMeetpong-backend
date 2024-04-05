@@ -1,9 +1,9 @@
-import Match from "../db/models/Match";
+import Match from "../../db/models/Match";
 import { Request, Response } from "express";
 import crypto from "crypto";
 
 
-export const createMatch = async (
+ const createMatchController = async (
   req: Request & { user?: string },
   res: Response
 ) => {
@@ -46,3 +46,4 @@ export const createMatch = async (
     }
   }
 };
+export default createMatchController;
