@@ -5,12 +5,13 @@ import { Server } from "socket.io";
 const handleInvitationController = async (
   req: Request,
   res: Response,
-  io: Server
 ) => {
   const { userId, senderId, action } = req.body; // action can be 'accept' or 'reject'
 
   try {
     let updatedUser;
+
+    // logic for accepting an invitation
     if (action === "accept") {
       updatedUser = await User.findByIdAndUpdate(
         userId,
@@ -22,20 +23,23 @@ const handleInvitationController = async (
       );
       if (updatedUser) {
         const sender = await User.findById(senderId);
-        io.to(senderId).emit("invitationAccepted", { userId });
+        // io.to(senderId).emit("invitationAccepted", { userId });
         return res.status(200).json({
           message: `You are now friends with ${sender?.username}`,
           data: updatedUser,
         });
       }
-    } else if (action === "reject") {
+    } 
+    
+    // logic for rejecting an invitation
+    else if (action === "reject") {
       updatedUser = await User.findByIdAndUpdate(
         userId,
         { $pull: { pendingRequests: senderId } },
         { new: true }
       );
       if (updatedUser) {
-        io.to(senderId).emit("invitationRejected", { userId });
+        // io.to(senderId).emit("invitationRejected", { userId });
         return res.status(200).json({
           message: "Invitation rejected successfully.",
           data: updatedUser,

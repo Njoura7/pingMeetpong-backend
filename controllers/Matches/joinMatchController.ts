@@ -38,7 +38,9 @@ const joinMatchController = async (
 
   // Check if match already has 4 players
   if (match.players.length >= 4) {
-    return res.status(400).json({ message: "Maximum players exceeded" });
+    return res
+    .status(400)
+    .json({ message: "Maximum players exceeded" });
   }
 
   // Add the user's ID to the players array

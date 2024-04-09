@@ -1,16 +1,14 @@
 import User from "../../db/models/User";
 import { Request, Response } from "express";
-import { Server } from "socket.io";
 
-const getInvitationController = async (
-  req: Request,
-  res: Response,
-  io: Server
-) => {
-  const { userId } = req.body;
+const getNotificationController = async (req: Request, res: Response) => {
+  const { userId } = req.params;
 
   try {
-    const user = await User.findById(userId);
+    // Find the user and populate pendingRequests
+    const user = await User.findById(userId)
+        .populate("pendingRequests", "username avatar _id friends") // Only get username, avatar, _id, and friends from pendingRequests
+        .select("-password"); // Exclude password from the main user document
     if (!user) {
       return res.status(404).json({
         message: "User not found.",
@@ -18,27 +16,18 @@ const getInvitationController = async (
       });
     }
 
-    io.on("friendRequest", async (data: { senderId: string }) => {
-      const sender = await User.findById(data.senderId);
-      if (sender) {
-        io.to(userId).emit("newInvitation", {
-          message: `You have a new friend request from ${sender.username}`,
-          data: sender,
-        });
-      }
-    });
-
+    // Return success response
     return res.status(200).json({
-      message: "Listening for new invitations.",
-      data: null,
+      message: "Invitations retrieved successfully.",
+      data: user.pendingRequests,
     });
   } catch (error) {
-    console.error("Error getting invitations:", error);
+    console.error("Error retrieving invitations:", error);
     return res.status(500).json({
-      message: "An error occurred while getting the invitations.",
+      message: "An error occurred while retrieving the invitations.",
       data: null,
     });
   }
 };
 
-export default getInvitationController;
+export default getNotificationController;
