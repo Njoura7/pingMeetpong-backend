@@ -44,7 +44,21 @@ const sendInvitationController = async (req: Request, res: Response) => {
         data: null,
       });
     }
+    // Update sender's sentRequests 
+    const updatedSender = await User.findByIdAndUpdate(
+      senderId,
+      { $addToSet: { sentRequests: recipientId } },
+      { new: true }
+    );
 
+    if (!updatedSender) { 
+      return res.status(404).json({ 
+        message: "Sender not found.",
+        data: null,
+       }); 
+      }
+
+  
     // Get sender's username and avatar
     const senderUsername = sender.username;
     const senderAvatar = sender.avatar;
@@ -60,7 +74,7 @@ const sendInvitationController = async (req: Request, res: Response) => {
         senderUsername,
         senderAvatar,
       };
-    
+
       io.to(recipientSocketId).emit("newNotification", notificationData);
 
       // Log the data that's being emitted

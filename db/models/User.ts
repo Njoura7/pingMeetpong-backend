@@ -4,9 +4,10 @@
   interface IUser extends Document {
     username: string;
     password: string;
-    avatar: string; // url of the avatar
-    friends: mongoose.Schema.Types.ObjectId[]; // Array of user IDs representing accepted friends
-    pendingRequests: mongoose.Schema.Types.ObjectId[]; // Array of user IDs representing pending friend requests
+    avatar: string; 
+    friends: mongoose.Schema.Types.ObjectId[]; 
+    sentRequests: mongoose.Schema.Types.ObjectId[]; 
+    pendingRequests: mongoose.Schema.Types.ObjectId[]; 
   }
 
   const userSchema = new mongoose.Schema<IUser>({
@@ -14,6 +15,7 @@
     password: { type: String, required: true, minlength: 5 },
     avatar: { type: String, required: true },
     friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    sentRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
     pendingRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
   });
 

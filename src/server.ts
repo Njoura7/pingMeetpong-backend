@@ -8,6 +8,7 @@ import authRoutes from "../routes/authRoutes";
 import matchRoutes from "../routes/matchRoutes";
 import usersRoutes from "../routes/usersRoutes";
 import invitationsRoutes from "../routes/invitationsRoutes";
+import searchRoutes from "../routes/searchRoutes";
 
 dotenv.config();
 
@@ -33,7 +34,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/matches", matchRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/invitations", invitationsRoutes);
-
+app.use("/api/search", searchRoutes);
 
 
 // Start the HTTP server
