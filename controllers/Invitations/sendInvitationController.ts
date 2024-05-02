@@ -1,99 +1,86 @@
 import User from "../../db/models/User";
 import { Request, Response } from "express";
-import { getRecipientSocketId, io, userSocketMap } from "../../src/socket";
+import { getRecipientSocketId, io } from "../../src/socket";
+import mongoose from "mongoose";
 
 const sendInvitationController = async (req: Request, res: Response) => {
   const { senderId, recipientId } = req.body;
 
+  if (senderId === recipientId) {
+    return res.status(400).json({
+      message: "You cannot send an invitation to yourself.",
+    });
+  }
+
   try {
-    // Find the sender user
-    const sender = await User.findById(senderId);
-    if (!sender) {
-      return res.status(404).json({
-        message: "Sender not found.",
-        data: null,
-      });
-    }
-    // Find the recipient user
-    const recipient = await User.findById(recipientId);
-    if (!recipient) {
-      return res.status(404).json({
-        message: "Recipient not found.",
-        data: null,
-      });
-    }
-
-    // Check if sender's ID already exists in recipient's pendingRequests
-    if (recipient.pendingRequests.includes(senderId)) {
+    if (
+      !mongoose.Types.ObjectId.isValid(senderId) ||
+      !mongoose.Types.ObjectId.isValid(recipientId)
+    ) {
       return res.status(400).json({
-        message: "You already sent an invitation to this account.",
-        data: null,
+        message: "Invalid user IDs.",
       });
     }
 
-    // Update recipient's pendingRequests
-    const updatedRecipient = await User.findByIdAndUpdate(
-      recipientId,
-      { $addToSet: { pendingRequests: senderId } }, // we use $addToSet to ensure uniqueness
-      { new: true } // return the updated document after the update operation
-    );
+    const sender = await User.findById(senderId);
+    const recipient = await User.findById(recipientId);
 
-    if (!updatedRecipient) {
+    if (!sender || !recipient) {
       return res.status(404).json({
-        message: "Recipient not found.",
-        data: null,
+        message: "One or both users not found.",
       });
     }
-    // Update sender's sentRequests 
-    const updatedSender = await User.findByIdAndUpdate(
-      senderId,
-      { $addToSet: { sentRequests: recipientId } },
-      { new: true }
+
+    // Check if there's already an existing invitation in either direction
+    const senderHasPendingFromRecipient = sender.pendingRequests.some((id) =>
+      id.equals(recipient._id)
+    );
+    const recipientHasPendingFromSender = recipient.pendingRequests.some((id) =>
+      id.equals(sender._id)
     );
 
-    if (!updatedSender) { 
-      return res.status(404).json({ 
-        message: "Sender not found.",
-        data: null,
-       }); 
-      }
-
-  
-    // Get sender's username and avatar
-    const senderUsername = sender.username;
-    const senderAvatar = sender.avatar;
-
-    // Emit newNotification event with sender data
-    const recipientSocketId: string | undefined =
-      getRecipientSocketId(recipientId);
-    console.log("recipientSocketId", recipientSocketId);
-    console.log("recipientId", recipientId);
-    if (recipientSocketId) {
-      const notificationData = {
-        senderId,
-        senderUsername,
-        senderAvatar,
-      };
-
-      io.to(recipientSocketId).emit("newNotification", notificationData);
-
-      // Log the data that's being emitted
-      console.log("Emitted newNotification event with data:", notificationData);
+    if (senderHasPendingFromRecipient || recipientHasPendingFromSender) {
+      return res.status(400).json({
+        message: "An invitation is already pending",
+      });
     }
-    // Return success response
+
+    // Update both users simultaneously to minimize race conditions
+    const [updateRecipient, updateSender] = await Promise.all([
+      User.findByIdAndUpdate(
+        recipientId,
+        { $addToSet: { pendingRequests: sender._id } },
+        { new: true }
+      ),
+      User.findByIdAndUpdate(
+        senderId,
+        { $addToSet: { sentRequests: recipient._id } },
+        { new: true }
+      ),
+    ]);
+
+    if (!updateRecipient || !updateSender) {
+      return res.status(500).json({
+        message: "Failed to update users.",
+      });
+    }
+
+    const recipientSocketId = getRecipientSocketId(recipientId);
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit("newNotification", {
+        senderId: sender._id,
+        senderUsername: sender.username,
+        senderAvatar: sender.avatar,
+      });
+    }
+
     return res.status(200).json({
       message: "Invitation sent successfully.",
-      sender: {
-        _id: sender._id,
-        username: sender.username,
-        avatar: sender.avatar,
-      },
     });
   } catch (error) {
     console.error("Error sending invitation:", error);
     return res.status(500).json({
       message: "An error occurred while sending the invitation.",
-      data: null,
     });
   }
 };

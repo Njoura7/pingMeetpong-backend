@@ -4,13 +4,16 @@ import User from "../../db/models/User";
 const searchUsers = async (req: Request, res: Response) => {
   const searchTerm = req.query.q as string; // Retrieve the search term from the query parameter
 
+  if (!searchTerm) {
+    return res.status(400).json({ message: "Search term is required" });
+  }
+
   try {
     console.log("Search term:", searchTerm);
 
     const users = await User.aggregate([
       {
         $search: {
-          index: "searchUsers", // specify the index name
           text: {
             query: searchTerm,
             path: "username",
@@ -28,7 +31,7 @@ const searchUsers = async (req: Request, res: Response) => {
           friends: 1,
         },
       },
-    ])
+    ]);
 
     console.log("Users:", users);
     res.json(users);

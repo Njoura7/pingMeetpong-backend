@@ -67,6 +67,7 @@
           username: user.username,
           avatar: user.avatar,
           friends: user.friends,
+          sentRequests: user.sentRequests,
           pendingRequests: user.pendingRequests,
         },
       });
