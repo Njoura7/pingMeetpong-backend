@@ -1,45 +1,58 @@
 import User from "../../db/models/User";
 import { Request, Response } from "express";
-import { Server } from "socket.io";
 
-const handleInvitationController = async (
-  req: Request,
-  res: Response,
-) => {
+const handleInvitationController = async (req: Request, res: Response) => {
   const { userId, senderId, action } = req.body; // action can be 'accept' or 'reject'
 
   try {
     let updatedUser;
+    let updatedSender;
 
     // logic for accepting an invitation
     if (action === "accept") {
-      updatedUser = await User.findByIdAndUpdate(
-        userId,
-        {
-          $pull: { pendingRequests: senderId },
-          $push: { friends: senderId },
-        },
-        { new: true }
-      );
-      if (updatedUser) {
-        const sender = await User.findById(senderId);
-        // io.to(senderId).emit("invitationAccepted", { userId });
+      [updatedUser, updatedSender] = await Promise.all([
+        User.findByIdAndUpdate(
+          userId,
+          {
+            $pull: { pendingRequests: senderId },
+            $push: { friends: senderId },
+          },
+          { new: true }
+        ),
+        User.findByIdAndUpdate(
+          senderId,
+          {
+            $pull: { sentRequests: userId },
+            $push: { friends: userId },
+          },
+          { new: true }
+        ),
+      ]);
+
+      if (updatedUser && updatedSender) {
         return res.status(200).json({
-          message: `You are now friends with ${sender?.username}`,
+          message: `You are now friends with ${updatedSender.username}`,
           data: updatedUser,
         });
       }
-    } 
-    
+    }
+
     // logic for rejecting an invitation
     else if (action === "reject") {
-      updatedUser = await User.findByIdAndUpdate(
-        userId,
-        { $pull: { pendingRequests: senderId } },
-        { new: true }
-      );
-      if (updatedUser) {
-        // io.to(senderId).emit("invitationRejected", { userId });
+      [updatedUser, updatedSender] = await Promise.all([
+        User.findByIdAndUpdate(
+          userId,
+          { $pull: { pendingRequests: senderId } },
+          { new: true }
+        ),
+        User.findByIdAndUpdate(
+          senderId,
+          { $pull: { sentRequests: userId } },
+          { new: true }
+        ),
+      ]);
+
+      if (updatedUser && updatedSender) {
         return res.status(200).json({
           message: "Invitation rejected successfully.",
           data: updatedUser,
