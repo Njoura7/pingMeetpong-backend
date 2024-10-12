@@ -1,75 +1,51 @@
 import User from "../../db/models/User";
 import { Request, Response } from "express";
+import mongoose from "mongoose";
 
 const handleInvitationController = async (req: Request, res: Response) => {
-  const { userId, senderId, action } = req.body; // action can be 'accept' or 'reject'
+  const { userId, invitationId, action } = req.body;
+
+  // Validate input
+  if (!userId || !invitationId || !action) {
+    return res.status(400).json({ message: "User ID, Invitation ID, and action are required." });
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(invitationId)) {
+    return res.status(400).json({ message: "Invalid user IDs." });
+  }
+
+  if (!["accept", "reject"].includes(action)) {
+    return res.status(400).json({ message: "Invalid action. Must be 'accept' or 'reject'." });
+  }
 
   try {
-    let updatedUser;
-    let updatedSender;
+    const [user, sender] = await Promise.all([
+      User.findById(userId),
+      User.findById(invitationId)
+    ]);
 
-    // logic for accepting an invitation
+    if (!user || !sender) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (!user.pendingRequests.includes(sender._id)) {
+      return res.status(400).json({ message: "No pending invitation from this user." });
+    }
+
     if (action === "accept") {
-      [updatedUser, updatedSender] = await Promise.all([
-        User.findByIdAndUpdate(
-          userId,
-          {
-            $pull: { pendingRequests: senderId },
-            $push: { friends: senderId },
-          },
-          { new: true }
-        ),
-        User.findByIdAndUpdate(
-          senderId,
-          {
-            $pull: { sentRequests: userId },
-            $push: { friends: userId },
-          },
-          { new: true }
-        ),
-      ]);
-
-      if (updatedUser && updatedSender) {
-        return res.status(200).json({
-          message: `You are now friends with ${updatedSender.username}`,
-          data: updatedUser,
-        });
-      }
+      user.friends.push(sender._id);
+      sender.friends.push(user._id);
     }
 
-    // logic for rejecting an invitation
-    else if (action === "reject") {
-      [updatedUser, updatedSender] = await Promise.all([
-        User.findByIdAndUpdate(
-          userId,
-          { $pull: { pendingRequests: senderId } },
-          { new: true }
-        ),
-        User.findByIdAndUpdate(
-          senderId,
-          { $pull: { sentRequests: userId } },
-          { new: true }
-        ),
-      ]);
+    user.pendingRequests = user.pendingRequests.filter(id => !id.equals(sender._id));
+    sender.sentRequests = sender.sentRequests.filter(id => !id.equals(user._id));
 
-      if (updatedUser && updatedSender) {
-        return res.status(200).json({
-          message: "Invitation rejected successfully.",
-          data: updatedUser,
-        });
-      }
-    } else {
-      return res.status(400).json({
-        message: "Invalid action.",
-        data: null,
-      });
-    }
+    await Promise.all([user.save(), sender.save()]);
+
+    return res.status(200).json({ message: `Invitation ${action}ed successfully.` });
   } catch (error) {
     console.error("Error handling invitation:", error);
-    return res.status(500).json({
-      message: "An error occurred while handling the invitation.",
-      data: null,
-    });
+    return res.status(500).json({ message: "An error occurred while handling the invitation." });
   }
 };
 

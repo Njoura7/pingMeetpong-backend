@@ -18,6 +18,7 @@ const getNotificationController = async (req: Request, res: Response) => {
       message: "Invitations retrieved successfully.",
       pendingRequests: user.pendingRequests,
       sentRequests: user.sentRequests,
+      friends: user.friends, 
     });
   } catch (error) {
     console.error("Error retrieving invitations:", error);
