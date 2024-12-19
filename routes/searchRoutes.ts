@@ -2,7 +2,7 @@
 import { Router } from "express";
 import  searchUsers  from "../controllers/Search/searchController";
 
-import { authMiddleware } from "../middlewares/authMiddleware"; // Import the middleware
+import { authMiddleware } from "../middlewares/authMiddleware"; 
 
 
 const router = Router();

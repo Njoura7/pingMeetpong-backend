@@ -21,7 +21,7 @@
 
 
   io.on("connection", (socket) => {
-    console.log("user connected",socket.id);
+    // console.log("user connected",socket.id);
 
       const userId = socket.handshake.query.userId;
       if (typeof userId === "string") {
@@ -32,7 +32,7 @@
         });
 
         socket.on("disconnect",() => {
-          console.log("user disconnected",socket.id);
+          // console.log("user disconnected",socket.id);
           delete userSocketMap[userId];
         })
       } 
