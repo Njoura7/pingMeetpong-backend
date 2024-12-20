@@ -29,6 +29,10 @@ app.use(express.urlencoded({ extended: true }));
 // Use cors middleware
 app.use(cors());
 
+app.get("/", (req: Request, res: Response) => {
+  res.send("Server is up and running!");
+});
+
 // Use routers
 app.use("/api/auth", authRoutes);
 app.use("/api/matches", matchRoutes);
