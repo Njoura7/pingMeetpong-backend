@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Match from "../db/models/Match";
+import Match from "../../db/models/Match";
 import { Request, Response } from "express";
 
 const joinMatchController = async (
@@ -22,6 +22,12 @@ const joinMatchController = async (
   if (!match) {
     return res.status(404).json({ message: "Match not found" });
   }
+  // Check if the user is the owner of the match
+  if (match.owner.toString() === userId) {
+    return res
+      .status(400)
+      .json({ message: "You cannot join a match that you created" });
+  }
 
   // Check if user has already joined the match
   if (match.players.includes(userIdObjectId)) {
@@ -31,8 +37,10 @@ const joinMatchController = async (
   }
 
   // Check if match already has 4 players
-  if (match.players.length >= 4) {
-    return res.status(400).json({ message: "Maximum players exceeded" });
+  if (match.players.length >= 3) {
+    return res
+    .status(400)
+    .json({ message: "Maximum players exceeded" });
   }
 
   // Add the user's ID to the players array

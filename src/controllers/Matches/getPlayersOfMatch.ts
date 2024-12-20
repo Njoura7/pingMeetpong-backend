@@ -1,7 +1,7 @@
-import Match from "../db/models/Match";
+import Match from "../../db/models/Match";
 import { Request, Response } from "express";
 
-export const getPlayersOfMatch = async (req: Request, res: Response) => {
+export const getPlayersOfMatchController = async (req: Request, res: Response) => {
   const { matchId } = req.params;
 
   try {

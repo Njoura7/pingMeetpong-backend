@@ -1,9 +1,9 @@
-import Match from "../db/models/Match";
+import Match from "../../db/models/Match";
 import { Request, Response } from "express";
 import crypto from "crypto";
 
 
-export const createMatch = async (
+ const createMatchController = async (
   req: Request & { user?: string },
   res: Response
 ) => {
@@ -14,10 +14,9 @@ export const createMatch = async (
     // Check if match with the same name already exists
     const existingMatch = await Match.findOne({ name });
     if (existingMatch) {
-      return res.status(400).json({
-        message: "Match with the same name already exists.",
-        data: null,
-      });
+      return res
+      .status(400)
+      .json({message: "Match with the same name already exists." });
     }
 
     let code;
@@ -37,7 +36,9 @@ export const createMatch = async (
   } catch (err: unknown) {
     if (err instanceof Error) {
       console.error("Error in match creation:", err.message);
-      res.status(400).json({ message: err.message, data: null });
+      res
+      .status(400)
+      .json({ message: err.message, data: null });
     } else {
       console.error("An unknown error occurred:", err);
       res
@@ -46,3 +47,4 @@ export const createMatch = async (
     }
   }
 };
+export default createMatchController;
