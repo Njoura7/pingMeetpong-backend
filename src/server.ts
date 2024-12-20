@@ -3,12 +3,12 @@ import { Request, Response, NextFunction } from "express";
 import { app, httpServer} from "./socket";
 import dotenv from "dotenv";
 import cors from "cors";
-import { connectDB } from "../db/connectDB";
-import authRoutes from "../routes/authRoutes";
-import matchRoutes from "../routes/matchRoutes";
-import usersRoutes from "../routes/usersRoutes";
-import invitationsRoutes from "../routes/invitationsRoutes";
-import searchRoutes from "../routes/searchRoutes";
+import { connectDB } from "./db/connectDB";
+import authRoutes from "./routes/authRoutes";
+import matchRoutes from "./routes/matchRoutes";
+import usersRoutes from "./routes/usersRoutes";
+import invitationsRoutes from "./routes/invitationsRoutes";
+import searchRoutes from "./routes/searchRoutes";
 
 dotenv.config();
 
@@ -48,7 +48,7 @@ httpServer.listen(port, () => {
 
 
 // Global error handler
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(500).send("Something broke!");
 });

@@ -1,6 +1,6 @@
 import User from "../../db/models/User";
 import { Request, Response } from "express";
-import { getRecipientSocketId, io } from "../../src/socket";
+import { getRecipientSocketId, io } from "../../socket";
 import mongoose from "mongoose";
 
 const sendInvitationController = async (req: Request, res: Response) => {
