@@ -7,6 +7,8 @@ exports.userSocketMap = exports.httpServer = exports.io = exports.app = exports.
 const socket_io_1 = require("socket.io");
 const http_1 = require("http"); // createServer from "http"
 const express_1 = __importDefault(require("express"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const app = (0, express_1.default)();
 exports.app = app;
 // Attach Socket.IO server to the HTTP server
@@ -14,9 +16,9 @@ const httpServer = (0, http_1.createServer)(app);
 exports.httpServer = httpServer;
 const io = new socket_io_1.Server(httpServer, {
     cors: {
-        origin: "http://localhost:5173",
-        methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-        credentials: true,
+        origin: process.env.PROD, // Allow both URLs
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        credentials: true, // Include credentials if needed
     },
 });
 exports.io = io;

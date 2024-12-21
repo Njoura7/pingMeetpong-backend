@@ -25,6 +25,9 @@ socket_1.app.use(express_1.default.json());
 socket_1.app.use(express_1.default.urlencoded({ extended: true }));
 // Use cors middleware
 socket_1.app.use((0, cors_1.default)());
+socket_1.app.get("/", (req, res) => {
+    res.send("Server is up and running!");
+});
 // Use routers
 socket_1.app.use("/api/auth", authRoutes_1.default);
 socket_1.app.use("/api/matches", matchRoutes_1.default);
