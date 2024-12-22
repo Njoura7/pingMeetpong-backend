@@ -2,7 +2,6 @@ import express from "express";
 import { Request, Response, NextFunction } from "express";
 import { app, httpServer} from "./socket";
 import dotenv from "dotenv";
-import cors from "cors";
 import { connectDB } from "./db/connectDB";
 import authRoutes from "./routes/authRoutes";
 import matchRoutes from "./routes/matchRoutes";
@@ -26,8 +25,8 @@ if (!uri) {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Use cors middleware
-app.use(cors());
+// // Use cors middleware
+// app.use(cors());
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Server is up and running!");
@@ -42,9 +41,9 @@ app.use("/api/search", searchRoutes);
 
 
 // Start the HTTP server
-httpServer.listen(port, () => {
+httpServer.listen(port,  () => {
   console.log(`Server is running on port ${port} in ${env} mode`);
-  // catch errors from the connectDB function
+
   connectDB().catch((error) => {
     console.error(`Failed to connect to MongoDB: ${error.message}`);
   });

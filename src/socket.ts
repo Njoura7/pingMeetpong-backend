@@ -1,20 +1,23 @@
   import {Server} from "socket.io"
-  import {createServer} from "http" // createServer from "http"
+  import {createServer} from "http" 
   import express from "express"
   import dotenv from "dotenv";
+  import cors from "cors";
 
-  
  dotenv.config();
 
-
   const app = express();
+
+  // Use cors middleware
+  app.use(cors());
+
   // Attach Socket.IO server to the HTTP server
   const httpServer = createServer(app);
   const io = new Server(httpServer, {
     cors: {
-      origin: process.env.PROD, 
-      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-      credentials: true, 
+      origin: [process.env.PROD, process.env.DEV].filter(Boolean) as string[], // Filter out undefined values
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+      credentials: true,
     },
   });
 
