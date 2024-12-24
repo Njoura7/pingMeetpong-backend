@@ -41,13 +41,23 @@ app.use("/api/search", searchRoutes);
 
 
 // Start the HTTP server
-httpServer.listen(port,  () => {
-  console.log(`Server is running on port ${port} in ${env} mode`);
+const startServer = async () => {
+  try {
+    await connectDB();
+    httpServer.listen(port, () => {
+      console.log(`Server is running on port ${port} in ${env} mode`);
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(`Failed to connect to MongoDB: ${error.message}`);
+    } else {
+      console.error('Failed to connect to MongoDB: Unknown error occurred');
+    }
+    process.exit(1);
+  }
+};
 
-  connectDB().catch((error) => {
-    console.error(`Failed to connect to MongoDB: ${error.message}`);
-  });
-});
+startServer();
 
 
 // Global error handler
