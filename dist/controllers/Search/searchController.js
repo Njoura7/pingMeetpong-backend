@@ -26,11 +26,8 @@ const searchUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                     autocomplete: {
                         query: searchTerm,
                         path: "username",
-                        fuzzy: {
-                            maxEdits: 1,
-                            prefixLength: 1, // Allows autocomplete from the first letter
-                        },
-                        score: { boost: { value: 2 } }, // Boost relevance for matches starting with the search term
+                        fuzzy: { maxEdits: 1, prefixLength: 1 },
+                        score: { boost: { value: 2 } },
                     },
                 },
             },
@@ -42,9 +39,7 @@ const searchUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                     score: { $meta: "searchScore" },
                 },
             },
-            {
-                $sort: { score: -1 }, // Sort by the most relevant
-            },
+            { $sort: { score: -1 } },
         ]);
         console.log("Users:", users);
         res.json(users);

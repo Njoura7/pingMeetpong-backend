@@ -4,11 +4,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
+require("./User");
 const matchSchema = new mongoose_1.default.Schema({
     name: { type: String, required: true },
     code: { type: String, required: true, unique: true },
     place: { type: String, required: true },
     date: { type: Date, required: true },
+    score: { type: String },
     owner: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User', required: true },
     players: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User' }],
 });

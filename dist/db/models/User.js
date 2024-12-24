@@ -29,5 +29,5 @@ userSchema.pre("save", function (next) {
         next();
     });
 });
-const User = mongoose_1.default.model("user", userSchema);
+const User = mongoose_1.default.model("User", userSchema);
 exports.default = User;
