@@ -11,32 +11,28 @@ const searchUsers = async (req: Request, res: Response) => {
   try {
     console.log("Search term:", searchTerm);
 
-   const users = await User.aggregate([
-     {
-       $search: {
-         autocomplete: {
-           query: searchTerm,
-           path: "username",
-           fuzzy: {
-             maxEdits: 1,
-             prefixLength: 1, // Allows autocomplete from the first letter
-           },
-           score: { boost: { value: 2 } }, // Boost relevance for matches starting with the search term
-         },
+ const users = await User.aggregate([
+   {
+     $search: {
+       autocomplete: {
+         query: searchTerm,
+         path: "username",
+         fuzzy: { maxEdits: 1, prefixLength: 1 },
+         score: { boost: { value: 2 } },
        },
      },
-     {
-       $project: {
-         _id: 1,
-         username: 1,
-         avatar: 1,
-         score: { $meta: "searchScore" },
-       },
+   },
+   {
+     $project: {
+       _id: 1,
+       username: 1,
+       avatar: 1,
+       score: { $meta: "searchScore" },
      },
-     {
-       $sort: { score: -1 }, // Sort by the most relevant
-     },
-   ]);
+   },
+   { $sort: { score: -1 } },
+ ]);
+
 
 
 
